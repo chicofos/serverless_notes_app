@@ -15,8 +15,9 @@ custom:
 provider:
   name: aws
   runtime: nodejs8.10
-  stage: dev
+  stage: prod
   region: us-east-1
+  profile: fochoa
 
 iamRoleStatements:
   - Effect: Allow
@@ -30,18 +31,56 @@ iamRoleStatements:
       - dynamodb:DeleteItem
     Resource: "arn:aws:dynamodb:us-east-1:*:*"
 
-functions:
-  # Defines an HTTP API endpoint that calls the main function in create.js
+  # Defines HTTP API endpoints that calls the main functions
   # - path: url path is /notes
   # - method: POST request
   # - cors: enabled CORS (Cross-Origin Resource Sharing) for browser cross
   #     domain api call
   # - authorizer: authenticate using the AWS IAM role
+
+functions:
+
   create:
     handler: create.main
     events:
       - http:
           path: notes
           method: post
+          cors: true
+          authorizer: aws_iam
+
+  get:
+    handler: get.main
+    events:
+      - http:
+          path: notes/{id}
+          method: get
+          cors: true
+          authorizer: aws_iam
+  
+  list:
+    handler: list.main
+    events:
+      - http:
+          path: notes
+          method: get
+          cors: true
+          authorizer: aws_iam
+  
+  update:
+    handler: update.main
+    events:
+      - http:
+          path: notes/{id}
+          method: PUT
+          cors: true
+          authorizer: aws_iam
+
+  delete:
+    handler: delete.main
+    events:
+      - http:
+          path: notes/{id}
+          method: DELETE
           cors: true
           authorizer: aws_iam
